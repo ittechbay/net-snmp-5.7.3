@@ -6,7 +6,7 @@
 #define FTSCLKTRAP_H
 
 /* function declarations */
-int send_ftsClkTrap_trap(void);
+void send_ftsClkTrap_trap(unsigned int clientreg,  void *clientarg);
 
 void init_ftsClkTrap(void);
 

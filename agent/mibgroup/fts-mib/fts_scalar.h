@@ -5,6 +5,21 @@
 #ifndef FTS_SCALAR_H
 #define FTS_SCALAR_H
 
+#define VAR_FTS_REF_CFG 0
+#define VAR_FTS_REF_CURRENT 1
+#define VAR_FTS_CLK_STATE 2
+#define VAR_FTS_CLK_MODE 3
+#define VAR_FTS_CLK_TIME_ACCURACY 4
+#define VAR_FTS_CLK_FREQ_ACCURACY 5
+#define VAR_FTS_CLK_TIME_THRESHOLD 6
+#define VAR_FTS_CLK_GRADE 7
+#define VAR_FTS_CLK_CURRENT_STATE_LAST 8
+#define VAR_FTS_CLK_CLASS 9
+#define VAR_FTS_NTP_NUMS 10
+#define VAR_FTS_PTP_NUMS 11
+#define VAR_FTS_TIMING_CFG 12
+#define VAR_FTS_NULL 13
+
 /* function declarations */
 void init_fts_scalar(void);
 Netsnmp_Node_Handler handle_ftsRefCfg;
@@ -20,5 +35,6 @@ Netsnmp_Node_Handler handle_ftsClkClass;
 Netsnmp_Node_Handler handle_ftsNtpNums;
 Netsnmp_Node_Handler handle_ftsPtpNums;
 Netsnmp_Node_Handler handle_ftsTimingCfg;
+void *fts_scalar_getvar(int var);
 
 #endif /* FTS_SCALAR_H */

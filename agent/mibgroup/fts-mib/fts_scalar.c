@@ -36,6 +36,7 @@
 #define PARSE_MODE_FTS_TIMING_CFG 12
 #define PARSE_MODE_NULL 13
 
+
 struct fts_scalar_data_s {
 	char ftsRefCfg[FTS_STRING_LEN];
 	int ftsRefCurrent;
@@ -53,7 +54,52 @@ struct fts_scalar_data_s {
 };
 struct fts_scalar_data_s fts_scalar_data;
 
-
+//data get interface
+void *fts_scalar_getvar(int var)
+{
+	// not support multi-task
+	switch (var)
+	{
+		case VAR_FTS_REF_CFG:
+			return fts_scalar_data.ftsRefCfg;
+		break;
+		case VAR_FTS_REF_CURRENT:
+			
+			return fts_scalar_data.ftsRefCurrent;
+		break;
+		case VAR_FTS_CLK_STATE:
+			return fts_scalar_data.ftsClkState;
+		break;
+		case VAR_FTS_CLK_MODE:
+			return fts_scalar_data.ftsClkMode;
+		break;
+		case VAR_FTS_CLK_TIME_ACCURACY:
+			return fts_scalar_data.ftsClkTimeAccuracy;
+		break;
+		case VAR_FTS_CLK_FREQ_ACCURACY:
+			return fts_scalar_data.ftsClkFreqAccuracy;
+		break;
+		case VAR_FTS_CLK_GRADE:
+			return fts_scalar_data.ftsClkGrade;
+		break;
+		case VAR_FTS_CLK_CURRENT_STATE_LAST:
+			return fts_scalar_data.ftsClkCurrentStateLast;
+		break;
+		case VAR_FTS_CLK_CLASS:
+			return fts_scalar_data.ftsClkClass;
+		break;
+		case VAR_FTS_NTP_NUMS:
+			return fts_scalar_data.ftsNtpNums;
+		break;
+		case VAR_FTS_PTP_NUMS:
+			return fts_scalar_data.ftsPtpNums;
+		break;
+		case VAR_FTS_TIMING_CFG:
+			return fts_scalar_data.ftsTimingCfg;
+		break;
+	}
+	return NULL;
+}
 
 
 void fts_scalar_load()
