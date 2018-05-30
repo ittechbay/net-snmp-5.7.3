@@ -1,0 +1,6 @@
+---- COLUMN_FTSPTPDELAYRESPS Matches (5 in 2 files) ----
+ftsPtpTable.c (\\192.168.100.131\work\root\snmp\net-snmp-5.7.3\agent\mibgroup\fts-mib):            case COLUMN_FTSPTPDELAYRESPS:
+ftsPtpTable.c (\\192.168.100.131\work\root\snmp\net-snmp-5.7.3\agent\mibgroup\fts-mib):			case COLUMN_FTSPTPDELAYRESPS:
+ftsPtpTable.c (\\192.168.100.131\work\root\snmp\net-snmp-5.7.3\agent\mibgroup\fts-mib):            case COLUMN_FTSPTPDELAYRESPS:
+ftsPtpTable.c (\\192.168.100.131\work\root\snmp\net-snmp-5.7.3\agent\mibgroup\fts-mib):			case COLUMN_FTSPTPDELAYRESPS:
+ftsPtpTable.h (\\192.168.100.131\work\root\snmp\net-snmp-5.7.3\agent\mibgroup\fts-mib):       #define COLUMN_FTSPTPDELAYRESPS		5

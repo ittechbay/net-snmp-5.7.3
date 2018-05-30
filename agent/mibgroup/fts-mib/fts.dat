@@ -1,0 +1,62 @@
+# 字符串类型变量用冒号括起来
+# 注释行用#开头;  snmpset -c public -v 1 localhost FTS-GLOBAL-REG::ftsClkState.1 i 1
+[ftsRefCfg]
+"GPS"
+
+[ftsRefCurrent]
+2
+
+[ftsRefTable]
+#ftsRefIndex ftsRefState ftsRefDescr ftsRefGrade
+1 2 "参考源类型B" 3
+2 1 "参考源类型A" 11
+
+[ftsClkState]
+2
+
+[ftsClkMode]
+2
+
+[ftsClkTimeAccuracy]
+3
+
+[ftsClkFreqAccuracy]
+3
+
+[ftsClkTimeThreshold]
+2
+
+[ftsClkGrade]
+11
+
+[ftsClkCurrentStateLast]
+13
+
+[ftsClkClass]
+3
+
+[ftsNtpNums]
+2
+
+[ftsNtpTable]
+#ftsNtpIndex ftsNtpState ftsNtpCalls ftsNtpReplays
+1 2 3 6
+2 3 4 3
+
+[ftsPtpNums]
+3
+
+[ftsPtpTable]
+#ftsPtpIndex ftsPtpState ftsPtpDomain ftsPtpDelayReqs ftsPtpDelayResps
+1 3 5 6
+2 4 2 9
+
+[ftsTimingCfg]
+"BDC16"
+
+[ftsTimingTable]
+#ftsTimingIndex ftsTimingState ftsTimingDescr
+1 2 5
+ 
+ 
+

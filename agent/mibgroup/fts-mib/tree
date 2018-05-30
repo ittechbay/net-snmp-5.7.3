@@ -1,0 +1,128 @@
++--node1(63000)
+   |
+   +--node2(2)
+      |
+      +--node3(1)
+         |
+         +--communication(13)
+            |
+            +--ftsRoot(1)
+               +--ftsGeneric(2)
+               |  +--ftsGlobalModule(1)
+               |     |
+               |     +--ftsRef(1)
+               |     |  |
+               |     |  +-- -R-- String    ftsRefCfg(1)
+               |     |  |        Textual Convention: DisplayString
+               |     |  +-- -R-- INTEGER   ftsRefCurrent(2)
+               |     |  |        Range: 1..15
+               |     |  |
+               |     |  +--ftsRefTable(7)
+               |     |     |
+               |     |     +--ftsRefEntry(1)
+               |     |        |  Index: ftsRefIndex
+               |     |        |
+               |     |        +-- -R-- INTEGER   ftsRefIndex(1)
+               |     |        |        Range: 1..15
+               |     |        +-- -RW- EnumVal   ftsRefState(2)
+               |     |        |        Values: unlocked(1), locked(2)
+               |     |        +-- -R-- String    ftsRefDescr(3)
+               |     |        |        Textual Convention: DisplayString
+               |     |        +-- -R-- INTEGER   ftsRefGrade(4)
+               |     |                 Range: 0..254
+               |     |
+               |     +--sysClock(2)
+               |     |  |
+               |     |  +-- -RW- EnumVal   ftsClkState(1)
+               |     |  |        Values: initializing(1), freeRun(2), tracking(3), tracked(4), holdover(5), fault(6)
+               |     |  +-- -RW- EnumVal   ftsClkMode(2)
+               |     |  |        Values: freerun(1), trace(2)
+               |     |  +-- -R-- Integer32 ftsClkTimeAccuracy(4)
+               |     |  +-- -R-- Integer32 ftsClkFreqAccuracy(5)
+               |     |  +-- -RW- Integer32 ftsClkTimeThreshold(6)
+               |     |  +-- -RW- Integer32 ftsClkFreqThreshold(7)
+               |     |  +-- -RW- Integer32 ftsClkGrade(8)
+               |     |  +-- -R-- Unsigned  ftsClkCurrentStateLast(9)
+               |     |  +-- -R-- EnumVal   ftsClkClass(10)
+               |     |           Values: hm(1), cs(2), rb(3), ocxo(4), tcxo(5), other(6)
+               |     |
+               |     +--ftsTrap(8)
+               |     |  |
+               |     |  +--ftsSysTrap(1)
+               |     |  +--ftsRefTrap(2)
+               |     |  +--ftsNtpTrap(3)
+               |     |  +--ftsPtpTrap(4)
+               |     |  +--ftsTimingTrap(6)
+               |     |
+               |     +--ftsCompliance(9)
+               |     |  |
+               |     |  +--ftsRefGroup(2)
+               |     |  +--ftsSysClkGroup(5)
+               |     |  +--ftsNtpGroup(7)
+               |     |  +--ftsNtpBasicGroup(8)
+               |     |  +--ftsPtpGroup(9)
+               |     |  +--ftsTimingGroup(11)
+               |     |  +--ftsNotificationGroup(13)
+               |     |  +--ftsSysClkBasicGroup(14)
+               |     |  +--ftsRefBasicGroup(15)
+               |     |  +--ftsPtpBasicGroup(16)
+               |     |  +--ftsBasicCompliance(17)
+               |     |  +--ftsFullCompliance(18)
+               |     |
+               |     +--ntp(10)
+               |     |  |
+               |     |  +-- -RW- Integer32 ftsNtpNums(1)
+               |     |  |
+               |     |  +--ftsNtpTable(4)
+               |     |     |
+               |     |     +--ftsNtpEntry(1)
+               |     |        |  Index: ftsRefIndex
+               |     |        |
+               |     |        +-- -R-- INTEGER   ftsNtpIndex(2)
+               |     |        |        Range: 1..15
+               |     |        +-- -R-- EnumVal   ftsNtpState(3)
+               |     |        |        Values: initial(1), active(2), fault(3), down(4)
+               |     |        +-- -R-- INTEGER   ftsNtpCalls(4)
+               |     |        |        Range: 1..6555
+               |     |        +-- -RW- Integer32 ftsNtpReplays(5)
+               |     |
+               |     +--ptp(11)
+               |     |  |
+               |     |  +-- -RW- INTEGER   ftsPtpNums(1)
+               |     |  |        Range: 1..15
+               |     |  |
+               |     |  +--ftsPtpTable(2)
+               |     |     |
+               |     |     +--ftsPtpEntry(1)
+               |     |        |  Index: ftsPtpIndex
+               |     |        |
+               |     |        +-- -R-- INTEGER   ftsPtpIndex(1)
+               |     |        |        Range: 1..15
+               |     |        +-- -R-- EnumVal   ftsPtpState(2)
+               |     |        |        Values: initallizing(1), fault(2), disabled(3), listening(4), preMaster(5), master(6), passive(7), uncalibrated(8), slave(9)
+               |     |        +-- -RW- Integer32 ftsPtpDomain(3)
+               |     |        +-- -RW- INTEGER   ftsPtpDelayResps(4)
+               |     |        |        Range: 0..6555
+               |     |        +-- -R-- INTEGER   ftsPtpDelayReqs(4)
+               |     |                 Range: 0..6555
+               |     |
+               |     +--timing(12)
+               |        |
+               |        +-- -RW- String    ftsTimingCfg(1)
+               |        |        Textual Convention: DisplayString
+               |        |
+               |        +--ftsTimingTable(3)
+               |           |
+               |           +--ftsTimingEntry(1)
+               |              |  Index: ftsTimingIndex
+               |              |
+               |              +-- -R-- INTEGER   ftsTimingIndex(2)
+               |              |        Range: 1..256
+               |              +-- -RW- EnumVal   ftsTimingState(3)
+               |              |        Values: down(1), active(2)
+               |              +-- -R-- INTEGER   ftsTimingDescr(4)
+               |                       Range: 1..255
+               |
+               +--ftsProducts(3)
+               +--ftsCaps(4)
+               +--ftsExpr(6)
