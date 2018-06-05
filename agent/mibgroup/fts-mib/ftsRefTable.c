@@ -14,26 +14,9 @@
 	
 	
 #include "fts_cfg.h"
+#include "ftsSetDo.h"
 
 
-    /* Typical data structure for a row entry */
-struct ftsRefTable_entry {
-    /* Index values */
-    long ftsRefIndex;
-
-    /* Column values */
-    // long ftsRefIndex;
-    long ftsRefState;
-    long old_ftsRefState;
-    char ftsRefDescr[FTS_STRING_LEN];
-    char old_ftsRefDescr[FTS_STRING_LEN];
-    size_t ftsRefDescr_len;
-    size_t old_ftsRefDescr_len;
-    long ftsRefGrade;
-    long old_ftsRefGrade;
-
-    int   valid;
-};
 
 
 
@@ -45,6 +28,11 @@ init_ftsRefTable(void)
     initialize_table_ftsRefTable();
 }
 
+void ftsRefTable_set_var(long ftsRefIndex, long ftsRefState,char *ftsRefDescr, long ftsRefDescr_len, long ftsRefGrade)
+{
+
+
+}
 
 void ftsRefTable_data_load(netsnmp_tdata *table_data)
 {
@@ -474,31 +462,38 @@ ftsRefTable_handler(
         break;
 
     case MODE_SET_ACTION:
-        for (request=requests; request; request=request->next) {
-            if (request->processed)
-                continue;
+		{
+			fts_set_cmd *cmd;
+			cmd = ftsSetCmd_make_refTable(requests);
+			ftsSetCmd_send(cmd);
+    	}
+      /*
+	      for (request=requests; request; request=request->next) {
+	            if (request->processed)
+	                continue;
 
-            table_entry = (struct ftsRefTable_entry *)
-                              netsnmp_tdata_extract_entry(request);
-            table_info  =     netsnmp_extract_table_info( request);
-    
-            switch (table_info->colnum) {
-            case COLUMN_FTSREFSTATE:
-                table_entry->old_ftsRefState = table_entry->ftsRefState;
-                table_entry->ftsRefState     = *request->requestvb->val.integer;
-                break;
-			case COLUMN_FTSREFDESCR:
-				strcpy(table_entry->ftsRefDescr, request->requestvb->val.string);
-				table_entry->ftsRefDescr_len = strlen(table_entry->ftsRefDescr);
-				break;
-			case COLUMN_FTSREFGRADE:
-				table_entry->ftsRefGrade = *request->requestvb->val.integer;
-				break;
+	            table_entry = (struct ftsRefTable_entry *)
+	                              netsnmp_tdata_extract_entry(request);
+	            table_info  =     netsnmp_extract_table_info( request);
+	    
+	            switch (table_info->colnum) {
+	            case COLUMN_FTSREFSTATE:
+	                table_entry->old_ftsRefState = table_entry->ftsRefState;
+	                table_entry->ftsRefState     = *request->requestvb->val.integer;
+	                break;
+				case COLUMN_FTSREFDESCR:
+					strcpy(table_entry->ftsRefDescr, request->requestvb->val.string);
+					table_entry->ftsRefDescr_len = strlen(table_entry->ftsRefDescr);
+					break;
+				case COLUMN_FTSREFGRADE:
+					table_entry->ftsRefGrade = *request->requestvb->val.integer;
+					break;
 
-				
-            }
-        }
+					
+	            }
+	        }
 		ftsRefTable_data_save(table_data);
+		*/
         break;
 
     case MODE_SET_UNDO:

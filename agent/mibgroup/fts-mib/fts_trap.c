@@ -10,9 +10,10 @@
 //#include <stdio.h>
 #include <string.h>
 
+#include "fts_cfg.h"
+
 #include "ftsRefCfg.h"
 
-#define FTS_STRING_LEN 64
 
 char var_ftsRefCfg[FTS_STRING_LEN];
 int var_ftsRefCurrent;

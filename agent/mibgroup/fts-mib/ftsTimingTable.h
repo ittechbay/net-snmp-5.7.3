@@ -8,6 +8,8 @@
 /* function declarations */
 void init_ftsTimingTable(void);
 void initialize_table_ftsTimingTable(void);
+void ftsTimingTable_data_save(netsnmp_tdata *table_data);
+
 Netsnmp_Node_Handler ftsTimingTable_handler;
 
 /* column number definitions for table ftsTimingTable */

@@ -5,10 +5,33 @@
 #ifndef FTSREFTABLE_H
 #define FTSREFTABLE_H
 
+#include "fts_cfg.h"
+    /* Typical data structure for a row entry */
+typedef struct ftsRefTable_entry {
+    /* Index values */
+    long ftsRefIndex;
+
+    /* Column values */
+    // long ftsRefIndex;
+    long ftsRefState;
+    long old_ftsRefState;
+    char ftsRefDescr[FTS_STRING_LEN];
+    char old_ftsRefDescr[FTS_STRING_LEN];
+    size_t ftsRefDescr_len;
+    size_t old_ftsRefDescr_len;
+    long ftsRefGrade;
+    long old_ftsRefGrade;
+
+    int   valid;
+} ftsRefTable_entry_s;
+
+
 /* function declarations */
 void init_ftsRefTable(void);
 void initialize_table_ftsRefTable(void);
 Netsnmp_Node_Handler ftsRefTable_handler;
+void ftsRefTable_data_save(netsnmp_tdata *table_data);
+
 
 /* column number definitions for table ftsRefTable */
        #define COLUMN_FTSREFINDEX		1

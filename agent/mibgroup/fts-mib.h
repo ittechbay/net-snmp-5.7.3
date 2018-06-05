@@ -8,6 +8,7 @@ config_require(fts-mib/ftsPtpTable)
 config_require(fts-mib/ftsNtpTable)
 config_require(fts-mib/ftsTimingTable)
 config_require(fts-mib/ftsClkTrap)
+config_require(fts-mib/ftsSetDo)
 
 
 

@@ -14,9 +14,9 @@
 
 #include "fts_cfg.h"
 #include "fts_scalar.h"
+#include "ftsSetDo.h"
 
 
-#define FTS_STRING_LEN 64
 
 #define FTS_REF_CFG_LEN 64
 #define FTS_TIMING_CFG 64
@@ -37,21 +37,6 @@
 #define PARSE_MODE_NULL 13
 
 
-struct fts_scalar_data_s {
-	char ftsRefCfg[FTS_STRING_LEN];
-	int ftsRefCurrent;
-	int ftsClkState;
-	int ftsClkMode;
-	int ftsClkTimeAccuracy;
-	int ftsClkFreqAccuracy;
-	int ftsClkTimeThreshold;
-	int ftsClkGrade;
-	int ftsClkCurrentStateLast;
-	int ftsClkClass;
-	int ftsNtpNums;
-	int ftsPtpNums;
-	char ftsTimingCfg[FTS_STRING_LEN];
-};
 struct fts_scalar_data_s fts_scalar_data;
 
 //data get interface
@@ -96,6 +81,50 @@ void *fts_scalar_getvar(int var)
 		break;
 		case VAR_FTS_TIMING_CFG:
 			return fts_scalar_data.ftsTimingCfg;
+		break;
+	}
+	return NULL;
+}
+void fts_scalar_set_var(int type, void *data)
+{
+	switch (type)
+	{
+		case VAR_FTS_REF_CFG:
+			return strcpy(fts_scalar_data.ftsRefCfg, (char *)data);
+		break;
+		case VAR_FTS_REF_CURRENT:
+			
+			return fts_scalar_data.ftsRefCurrent = *(int *)data;
+		break;
+		case VAR_FTS_CLK_STATE:
+			return fts_scalar_data.ftsClkState = *(int *)data;
+		break;
+		case VAR_FTS_CLK_MODE:
+			return fts_scalar_data.ftsClkMode = *(int *)data;
+		break;
+		case VAR_FTS_CLK_TIME_ACCURACY:
+			return fts_scalar_data.ftsClkTimeAccuracy = *(int *)data;
+		break;
+		case VAR_FTS_CLK_FREQ_ACCURACY:
+			return fts_scalar_data.ftsClkFreqAccuracy = *(int *)data;
+		break;
+		case VAR_FTS_CLK_GRADE:
+			return fts_scalar_data.ftsClkGrade = *(int *)data;
+		break;
+		case VAR_FTS_CLK_CURRENT_STATE_LAST:
+			return fts_scalar_data.ftsClkCurrentStateLast = *(int *)data;
+		break;
+		case VAR_FTS_CLK_CLASS:
+			return fts_scalar_data.ftsClkClass = *(int *)data;
+		break;
+		case VAR_FTS_NTP_NUMS:
+			return fts_scalar_data.ftsNtpNums = *(int *)data;
+		break;
+		case VAR_FTS_PTP_NUMS:
+			return fts_scalar_data.ftsPtpNums = *(int *)data;
+		break;
+		case VAR_FTS_TIMING_CFG:
+			return strcpy(fts_scalar_data.ftsTimingCfg, (char *)data);
 		break;
 	}
 	return NULL;
@@ -514,6 +543,7 @@ handle_ftsRefCurrent(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }
 
+// why so many enter to this function
 int
 handle_ftsClkState(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -521,6 +551,7 @@ handle_ftsClkState(netsnmp_mib_handler *handler,
                           netsnmp_request_info         *requests)
 {
     int ret;
+	fts_set_cmd *cmd;
 
     /* We are never called for a GETNEXT if it's registered as a
        "instance", as it's "magically" handled for us.  */
@@ -529,7 +560,6 @@ handle_ftsClkState(netsnmp_mib_handler *handler,
        we don't need to loop over a list of requests; we'll only get one. */
     
     switch(reqinfo->mode) {
-
 
         case MODE_GET:
             snmp_set_var_typed_integer(requests->requestvb, ASN_INTEGER,
@@ -565,8 +595,10 @@ handle_ftsClkState(netsnmp_mib_handler *handler,
 
         case MODE_SET_ACTION:
 	    //value =  *(requests->requestvb->val.integer);
-		fts_scalar_data.ftsClkState = *(requests->requestvb->val.integer);
-		fts_scalar_save();
+		cmd = ftsSetCmd_make_scalar(requests, FTS_SET_CMD_SCALAR_CLK_STATE);
+		ftsSetCmd_send(cmd);
+		//fts_scalar_data.ftsClkState = *(requests->requestvb->val.integer);
+		//fts_scalar_save();
 		//strcpy(var_ftsRefCfg, requests->requestvb->val.string);
             //rc = netsnmp_arch_ip_scalars_ipDefaultTTL_set(value);
             //if ( 0 != rc ) {
@@ -574,10 +606,10 @@ handle_ftsClkState(netsnmp_mib_handler *handler,
            // }
 
 
-            ///* XXX: perform the value change here */
-           // if (/* XXX: error? */) {
-            //    netsnmp_set_request_error(reqinfo, requests, /* some error */);
-           // }
+			///* XXX: perform the value change here */
+			// if (/* XXX: error? */) {
+			//    netsnmp_set_request_error(reqinfo, requests, /* some error */);
+			// }
             break;
 
         case MODE_SET_COMMIT:
@@ -612,6 +644,7 @@ handle_ftsClkMode(netsnmp_mib_handler *handler,
                           netsnmp_request_info         *requests)
 {
     int ret;
+	fts_set_cmd *cmd;
 
     switch(reqinfo->mode) {
         case MODE_GET:
@@ -630,8 +663,12 @@ handle_ftsClkMode(netsnmp_mib_handler *handler,
         case MODE_SET_FREE:
             break;
         case MODE_SET_ACTION:
+			/*
+			cmd = ftsSetCmd_make_scalar(FTS_SET_CMD_SCALAR_CLK_STATE,int data);
+			ftsSetCmd_send(cmd);
 			fts_scalar_data.ftsClkMode = *(requests->requestvb->val.integer);
 			fts_scalar_save();
+			*/
             break;
         case MODE_SET_COMMIT:
             break;
@@ -846,14 +883,13 @@ handle_ftsNtpNums(netsnmp_mib_handler *handler,
         case MODE_SET_FREE:
             break;
         case MODE_SET_ACTION:
-		fts_scalar_data.ftsNtpNums = *(requests->requestvb->val.integer);
-		fts_scalar_save();
+			fts_scalar_data.ftsNtpNums = *(requests->requestvb->val.integer);
+			fts_scalar_save();
             break;
         case MODE_SET_COMMIT:
             break;
         case MODE_SET_UNDO:
             break;
-
         default:
             snmp_log(LOG_ERR, "unknown mode (%d) in handle_ftsRefCfg\n", reqinfo->mode );
             return SNMP_ERR_GENERR;
