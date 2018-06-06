@@ -166,7 +166,6 @@ void ftsSetCmd_send(fts_set_cmd *ftscmd)
 {
 /* 	fts_set_cmd *p;
 	
-	
 	ftscmd->next = NULL;
 
 	pthread_mutex_lock(&ftsSetMutex);		
@@ -185,9 +184,6 @@ void ftsSetCmd_send(fts_set_cmd *ftscmd)
 	*/
 	int ret;
 	int s;
-
-
-	
 	
 	ret = pthread_create(NULL, NULL, &ftsSetCmdThread, ftscmd);
 	if (ret != 0)

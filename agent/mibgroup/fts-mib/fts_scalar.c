@@ -595,17 +595,17 @@ handle_ftsClkState(netsnmp_mib_handler *handler,
 
         case MODE_SET_ACTION:
 	    //value =  *(requests->requestvb->val.integer);
-		cmd = ftsSetCmd_make_scalar(requests, FTS_SET_SCALAR_FRAME_CLK_STATE);
+		/*cmd = ftsSetCmd_make_scalar(requests, FTS_SET_SCALAR_FRAME_CLK_STATE);
 		ftsSetCmd_send(cmd);
 
 		
 		ret = fts_scalar_set_process(cmd->requests);
 		if (ret != 0)
 			break;
-		
+		*/
 		fts_scalar_data.ftsClkState = *(requests->requestvb->val.integer);
 		fts_scalar_save();
-
+		
 
 		//fts_scalar_data.ftsClkState = *(requests->requestvb->val.integer);
 		//fts_scalar_save();
@@ -676,9 +676,9 @@ handle_ftsClkMode(netsnmp_mib_handler *handler,
 			/*
 			cmd = ftsSetCmd_make_scalar(FTS_SET_CMD_SCALAR_CLK_STATE,int data);
 			ftsSetCmd_send(cmd);
+			*/
 			fts_scalar_data.ftsClkMode = *(requests->requestvb->val.integer);
 			fts_scalar_save();
-			*/
             break;
         case MODE_SET_COMMIT:
             break;

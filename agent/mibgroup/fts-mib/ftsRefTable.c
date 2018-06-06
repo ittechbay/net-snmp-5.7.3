@@ -462,12 +462,13 @@ ftsRefTable_handler(
         break;
 
     case MODE_SET_ACTION:
+		/*
 		{
 			fts_set_cmd *cmd;
 			cmd = ftsSetCmd_make_refTable(requests);
 			ftsSetCmd_send(cmd);
     	}
-      /*
+		  */
 	      for (request=requests; request; request=request->next) {
 	            if (request->processed)
 	                continue;
@@ -493,7 +494,6 @@ ftsRefTable_handler(
 	            }
 	        }
 		ftsRefTable_data_save(table_data);
-		*/
         break;
 
     case MODE_SET_UNDO:
