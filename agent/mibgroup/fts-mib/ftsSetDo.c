@@ -11,6 +11,14 @@
 #include "ftsNtpTable.h"
 #include "ftsPtpTable.h"
 #include "ftsTimingTable.h"
+#include "can.h"
+
+#include <sys/types.h>			/* See NOTES */
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <net/if.h>
+
+
 
 
 #include <stdio.h>
@@ -25,6 +33,7 @@
 
 
 
+#define SOL_CAN_RAW (SOL_CAN_BASE + CAN_RAW)
 
 
 
@@ -44,12 +53,12 @@ void init_ftsSetDo(void)
 	ftsCmdHead = NULL;
 	
 	//create pthread ftsSetCmdThread;
+	/* 
 	ret = pthread_create(&thread, NULL, &ftsSetCmdThread, NULL);
 	if (ret != 0)
 	{
 		DEBUGMSGTL(("init_ftsSetDo", "pthread_create\n"));
 		exit(1);
-			
 	}
 
 	
@@ -60,6 +69,7 @@ void init_ftsSetDo(void)
 		exit(1);
 			
 	}
+	*/
 
 	return; //.................
 	ret = pthread_join(thread, &res);
@@ -69,6 +79,37 @@ void init_ftsSetDo(void)
 		exit(1);
 	}
 	
+}
+
+extern struct fts_scalar_data_s fts_scalar_data;
+
+struct can_frame * ftsCan_makeScalarFrame(netsnmp_request_info *requests, int type)
+{
+	struct can_frame *frame;
+	
+	frame = malloc(sizeof(struct can_frame));
+
+	
+	if (frame == NULL)
+	{
+		DEBUGMSGTL(("ftsCan_makeScalarFrame", "malloc\n"));
+		exit(1);
+	}
+
+	switch (type)
+	{
+	case FTS_SET_SCALAR_FRAME_CLK_STATE:
+		frame->can_id = FTS_FRAME_CLK_ID;
+		frame->can_dlc = 2;
+		memcpy(frame->data, (char *)&fts_scalar_data.ftsClkState, sizeof(fts_scalar_data.ftsClkState));
+		
+		
+		break;
+	case FTS_SET_SCALAR_FRAME_CLK_MODE:
+		break;
+		
+	}
+	return frame;
 }
 
 fts_set_cmd * ftsSetCmd_make_scalar(netsnmp_request_info *requests, int type)
@@ -123,7 +164,8 @@ void ftsSetCmd_free(fts_set_cmd *cmd)
 
 void ftsSetCmd_send(fts_set_cmd *ftscmd)
 {
-	fts_set_cmd *p;
+/* 	fts_set_cmd *p;
+	
 	
 	ftscmd->next = NULL;
 
@@ -140,12 +182,66 @@ void ftsSetCmd_send(fts_set_cmd *ftscmd)
 		p->next = ftscmd;
 	}
 	pthread_mutex_unlock(&ftsSetMutex);		
+	*/
+	int ret;
+	int s;
+
+
+	
+	
+	ret = pthread_create(NULL, NULL, &ftsSetCmdThread, ftscmd);
+	if (ret != 0)
+	{
+		DEBUGMSGTL(("ftsSetCmd_send", "pthread_create\n"));
+		exit(1);
+	}
 	
 }
+#define CAN_RAW_RECV_OWN_MSGS 0x4 
 
 // scalar can process: 0 ok; other error
-int fts_scalar_set_process()
+int fts_scalar_set_process(struct can_frame *frame)
 {
+	int sock;
+	struct sockaddr_can addr;
+	struct ifreq ifr;
+	int ret;
+	int recv_own_msgs = 0;//set loop back:  1 enable 0 disable
+
+	sock = socket(PF_CAN, SOCK_RAW, CAN_RAW);
+	if(sock < 0) {
+		printf("error\n");
+		return -1;
+	}
+
+	addr.can_family = AF_CAN;
+	strcpy(ifr.ifr_name, "can0"); //?? which can should i use
+
+
+	ret = ioctl(sock, SIOCGIFINDEX, &ifr);  //get index
+	if(ret && ifr.ifr_ifindex == 0) 
+	{
+		printf("Can't get interface index for can0, code= %d, can0 ifr_ifindex value: %d, name: %s\n", ret, ifr.ifr_ifindex, ifr.ifr_name);
+		close(sock);
+		return -1;
+	}
+
+	printf("%s can_ifindex = %x\n",ifr.ifr_name,ifr.ifr_ifindex);
+	addr.can_ifindex = ifr.ifr_ifindex;
+
+	//ioctl(sock,SIOCGIFNAME,&ifr);
+	//printf("ret = %d can0 can_ifname = %s\n",ret,ifr.ifr_name);	
+
+
+	setsockopt(sock, SOL_CAN_RAW, CAN_RAW_RECV_OWN_MSGS,&recv_own_msgs, sizeof(recv_own_msgs));
+	if (bind(sock,(struct sockaddr*)&addr,sizeof(addr))<0) {
+		printf("bind error\n");
+		close(sock);
+		return -1;
+	}
+
+	write(sock, &frame, sizeof(struct can_frame));
+	close(sock);
 	return 0;
 }
 
@@ -154,11 +250,92 @@ int fts_refTable_set_process()
 
 }
 
-extern struct fts_scalar_data_s fts_scalar_data;
 
 //other way: create one thread for every snmp set request
-void ftsSetCmdThread()
+void ftsSetCmdThread(void *arg)
 {
+	fts_set_cmd *cmd;
+	netsnmp_request_info *requests, *request;
+	
+	netsnmp_tdata *table_data;
+	struct ftsRefTable_entry *table_entry;
+
+
+	cmd = (fts_set_cmd *)arg;
+	
+			
+			//process cmd
+			if (cmd->type == FTS_SET_CMD_TYPE_SCALAR)
+			{
+			switch (cmd->scalar_type)
+				{
+				int ret;
+				
+				case FTS_SET_CMD_SCALAR_CLK_STATE:
+					ret = fts_scalar_set_process(cmd->requests);
+					if (ret != 0)
+						break;
+					
+					fts_scalar_data.ftsClkState = *(requests->requestvb->val.integer);
+					fts_scalar_save();
+					
+				break;
+				case FTS_SET_CMD_SCALAR_CLK_MODE:
+					//ret = fts_scalar_set_process();
+					//if (ret == 0)
+					//{
+					//	fts_scalar_set_var(VAR_FTS_REF_CURRENT, p->scalar_data);
+					//	fts_scalar_save();
+					//}
+				break;
+				}
+			}
+			else if (cmd->type == FTS_SET_CMD_TYPE_TABLE)
+			{
+				switch (cmd->table_type)
+				{
+				int ret;
+				netsnmp_table_request_info *table_info;
+				
+				case FTS_SET_CMD_TABLE_NTP:
+					//set table data
+					ret = fts_refTable_set_process();
+					if (ret != 0)
+						break;
+					requests = cmd->requests;
+					for (request=requests; request; request=request->next) {
+						if (request->processed)
+							continue;
+					
+						table_entry = (struct ftsRefTable_entry *)
+										  netsnmp_tdata_extract_entry(request);
+						table_info	=	  netsnmp_extract_table_info( request);
+					
+						switch (table_info->colnum) {
+						case COLUMN_FTSREFSTATE:
+							table_entry->ftsRefState	 = *request->requestvb->val.integer;
+							break;
+						case COLUMN_FTSREFDESCR:
+							strcpy(table_entry->ftsRefDescr, request->requestvb->val.string);
+							table_entry->ftsRefDescr_len = strlen(table_entry->ftsRefDescr);
+							break;
+						case COLUMN_FTSREFGRADE:
+							table_entry->ftsRefGrade = *request->requestvb->val.integer;
+							break;
+						}
+					}
+					table_data = netsnmp_tdata_extract_table(cmd->requests);
+					ftsRefTable_data_save(table_data);
+	
+					// set mib dat file
+					break;
+				}
+			}
+			// free p;
+			ftsSetCmd_free(cmd);
+
+
+#if 0
 	fts_set_cmd *p;
 	netsnmp_tdata *table_data;
 	struct ftsRefTable_entry *table_entry;
@@ -256,5 +433,6 @@ void ftsSetCmdThread()
 		ftsSetCmd_free(p);
 		pthread_mutex_unlock(&ftsSetMutex);
 	}
+#endif
 	
 }

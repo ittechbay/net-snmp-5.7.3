@@ -26,6 +26,8 @@ typedef struct fts_set_cmd_s{
 void init_ftsSetDo(void);
 void ftsSetCmdThread();
 
+#define FTS_FRAME_CLK_ID 0x70
+
 
 #define FTS_SET_CMD_TYPE_SCALAR 1
 #define FTS_SET_CMD_TYPE_TABLE 2
@@ -36,8 +38,8 @@ void ftsSetCmdThread();
 #define FTS_SET_CMD_SCALAR_CLK_MODE 2
 
 
-
-
+#define FTS_SET_SCALAR_FRAME_CLK_STATE 1
+#define FTS_SET_SCALAR_FRAME_CLK_MODE 2
 
 
 #define FTS_SET_CMD_TABLE_REF 1
