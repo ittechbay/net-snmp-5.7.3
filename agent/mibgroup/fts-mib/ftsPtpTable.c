@@ -16,7 +16,7 @@
 #include "fts_cfg.h"
 
 
-
+#if 0
     /* Typical data structure for a row entry */
 struct ftsPtpTable_entry {
     /* Index values */
@@ -32,17 +32,78 @@ struct ftsPtpTable_entry {
 
     int   valid;
 };
+#endif
 
+    /* Typical data structure for a row entry */
+struct ftsPtpTable_entry {
+    /* Index values */
+    long ftsPtpSlot;
+    /* Column values */
+   // long ftsPtpIndex;
+    long ftsPtpError;
+    long ftsPtpMode;
+	long ftsPtpSynRate;
+	long ftsPtpDelayRate;
 
+    int   valid;
+};
+
+struct ptp_board_s{
+	int num;
+	int slot[3]; //
+	int error[3]; //board is ok
+} ptp_board;  //delete 
 
 /** Initializes the ftsRefTable module */
+
+void ptp_board_init(netsnmp_tdata *table_data)
+{
+	int i;
+	struct can_frame *can_send;
+	struct can_frame *can_recv;
+	int ret;
+	int flag;
+	int canid;
+
+
+
+	ptp_board.num = 0;
+	
+	for (i = 0; i<3; i++)
+	{
+		ptp_board.slot[i] = 0;
+	}
+	
+	can_recv = malloc(sizeof(struct can_frame));
+	for (i = 0; i<3; i++)
+	{
+		canid = fts_can_mk_send_id(i, FTS_BOARD_TYPE_PTP);
+		can_send = fts_can_make_scalar_frame_ptp_poll(canid);
+		ret = fts_can_send_and_recv(can_send, can_recv);
+		if (ret != 0)
+			continue;
+		fts_can_parse_scalar_frame_ptp_poll_reply(can_recv,&flag);
+		
+		ftsPtpTable_createEntry(table_data, i, flag, 0, 0, 0);
+		
+		ptp_board.slot[ptp_board.num] = 1;
+		ptp_board.flag[ptp_board.num] = flag;
+		ptp_board.num++;	
+	}
+
+	free(can_recv);
+
+	
+}
+
+
 void
 init_ftsPtpTable(void)
 {
   /* here we initialize all the tables we're planning on supporting */
     initialize_table_ftsPtpTable();
+	ptp_board_init();
 }
-
 
 void ftsPtpTable_data_load(netsnmp_tdata *table_data)
 {
@@ -63,7 +124,6 @@ void ftsPtpTable_data_load(netsnmp_tdata *table_data)
 		DEBUGMSGTL(("ftsPtpTable_data_load", "save fts data from file\n"));
 		return;
 	}
-
 
  	while (fgets(line, sizeof(line), fp)) 
 	{
@@ -94,8 +154,6 @@ void ftsPtpTable_data_load(netsnmp_tdata *table_data)
 			if (!entry)
 				return;
 			sscanf(line, "%d %d %d %d %d", &entry->ftsPtpIndex, &entry->ftsPtpState, &entry->ftsPtpDomain, &entry->ftsPtpDelayReqs, &entry->ftsPtpDelayResps);
-
-
 			row = netsnmp_tdata_create_row();
 			if (!row) {
 				SNMP_FREE(entry);
@@ -108,7 +166,6 @@ void ftsPtpTable_data_load(netsnmp_tdata *table_data)
 			netsnmp_tdata_add_row(table_data, row);
 		}
  	}
-
 }
 
 void ftsPtpTable_data_save(netsnmp_tdata *table_data)
@@ -229,7 +286,7 @@ initialize_table_ftsPtpTable(void)
         snmp_log(LOG_ERR,"error creating tdata table for ftsPtpTable\n");
         return;
     }
-	ftsPtpTable_data_load(table_data);
+	//ftsPtpTable_data_load(table_data);
     table_info = SNMP_MALLOC_TYPEDEF( netsnmp_table_registration_info );
     if (NULL == table_info) {
         snmp_log(LOG_ERR,"error creating table info for ftsPtpTable\n");
@@ -239,8 +296,8 @@ initialize_table_ftsPtpTable(void)
                            ASN_INTEGER,  /* index: ftsPtpIndex */
                            0);
 
-    table_info->min_column = COLUMN_FTSPTPINDEX;
-    table_info->max_column = COLUMN_FTSPTPDELAYRESPS;
+    table_info->min_column = COLUMN_FTSPTPSLOT;
+    table_info->max_column = COLUMN_FTSPTPDELAYRATE;
     
     netsnmp_tdata_register( reg, table_data, table_info );
 
@@ -251,8 +308,9 @@ initialize_table_ftsPtpTable(void)
 /* create a new row in the table */
 netsnmp_tdata_row *
 ftsPtpTable_createEntry(netsnmp_tdata *table_data
-                 , long  ftsPtpIndex
-                ) {
+                 , long  ftsPtpSlot, long  ftsPtpError, long  ftsPtpMode, long  ftsPtpSynRate, long ftsPtpDelayRate) {
+
+
     struct ftsPtpTable_entry *entry;
     netsnmp_tdata_row *row;
 
@@ -268,12 +326,16 @@ ftsPtpTable_createEntry(netsnmp_tdata *table_data
     row->data = entry;
 
     DEBUGMSGT(("ftsPtpTable:entry:create", "row 0x%x\n", (uintptr_t)row));
-    entry->ftsPtpIndex = ftsPtpIndex;
+    entry->ftsPtpSlot = ftsPtpSlot;
+    entry->ftsPtpError = ftsPtpError;
+    entry->ftsPtpMode = ftsPtpMode;
+    entry->ftsPtpSynRate = ftsPtpSynRate;
+    entry->ftsPtpDelayRate = ftsPtpDelayRate;
     netsnmp_tdata_row_add_index( row, ASN_INTEGER,
                                  &(entry->ftsPtpIndex),
                                  sizeof(entry->ftsPtpIndex));
     if (table_data)
-        netsnmp_tdata_add_row( table_data, row );
+        netsnmp_tdata_add_row( table_data, row);
     return row;
 }
 
@@ -318,7 +380,7 @@ ftsPtpTable_handler(
     DEBUGMSGTL(("ftsPtpTable:handler", "Processing request (%d)\n", reqinfo->mode));
 
     switch (reqinfo->mode) {
-        /*
+     /*
          * Read-support (also covers GetNext requests)
          */
     case MODE_GET:
@@ -329,52 +391,86 @@ ftsPtpTable_handler(
             table_entry = (struct ftsPtpTable_entry *)
                               netsnmp_tdata_extract_entry(request);
             table_info  =     netsnmp_extract_table_info( request);
+
+
+
+			////////////////////////////
+			int canid;
+			struct can_frame *can_send;
+			struct can_frame *can_recv;
+			int flag;
+			long mode;
+			long synRate;
+			long delayRate;
+
+			canid = fts_can_mk_send_id(table_entry->ftsPtpSlot, FTS_BOARD_TYPE_PTP);
+			can_send = fts_can_make_scalar_frame_ptp_poll(canid);
+			ret = fts_can_send_and_recv(can_send, can_recv);
+			
+			if (ret != 0)
+				{
+				netsnmp_tdata_remove_and_delete_row(table_data,netsnmp_tdata_extract_row(request));
+				}
+			fts_can_parse_scalar_frame_ptp_poll_reply(can_recv,&flag);
+			table_entry->ftsPtpFlag = flag;
+
+			can_send = fts_can_make_scalar_frame_ptp_get_state(canid);
+			ret = fts_can_send_and_recv(can_send, can_recv);
+			if (ret != 0)
+				{
+				netsnmp_tdata_remove_and_delete_row(table_data,netsnmp_tdata_extract_row(request));
+				}
+			fts_can_parse_scalar_frame_ptp_get_state_reply(can_recv,&mode, &synRate, &delayRate);
+			table_entry->ftsPtpMode= *mode;
+			table_entry->ftsPtpSynRate= *synRate;
+			table_entry->ftsPtpDelayRate= *delayRate;
+			
     
             switch (table_info->colnum) {
-            case COLUMN_FTSPTPINDEX:
+            case COLUMN_FTSPTPSLOT:
                 if ( !table_entry ) {
                     netsnmp_set_request_error(reqinfo, request,
                                               SNMP_NOSUCHINSTANCE);
                     continue;
                 }
-                snmp_set_var_typed_integer( request->requestvb, ASN_INTEGER,
-                                            table_entry->ftsPtpIndex);
+                snmp_set_var_typed_integer(request->requestvb, ASN_INTEGER,
+                                            table_entry->ftsPtpSlot);
                 break;
-            case COLUMN_FTSPTPSTATE:
+            case COLUMN_FTSPTPERROR:
                 if ( !table_entry ) {
                     netsnmp_set_request_error(reqinfo, request,
                                               SNMP_NOSUCHINSTANCE);
                     continue;
                 }
                 snmp_set_var_typed_integer( request->requestvb, ASN_INTEGER,
-                                            table_entry->ftsPtpState);
+                                            table_entry->ftsPtpError);
                 break;
-            case COLUMN_FTSPTPDOMAIN:
+            case COLUMN_FTSPTPMODE:
                 if ( !table_entry ) {
                     netsnmp_set_request_error(reqinfo, request,
                                               SNMP_NOSUCHINSTANCE);
                     continue;
                 }
                 snmp_set_var_typed_integer( request->requestvb, ASN_INTEGER,
-                                            table_entry->ftsPtpDomain);
+                                            table_entry->ftsPtpMode);
                 break;
-            case COLUMN_FTSPTPDELAYREQS:
+            case COLUMN_FTSPTPSYNRATE:
                 if ( !table_entry ) {
                     netsnmp_set_request_error(reqinfo, request,
                                               SNMP_NOSUCHINSTANCE);
                     continue;
                 }
                 snmp_set_var_typed_integer( request->requestvb, ASN_INTEGER,
-                                            table_entry->ftsPtpDelayReqs);
+                                            table_entry->ftsPtpSynRate);
                 break;
-            case COLUMN_FTSPTPDELAYRESPS:
+            case COLUMN_FTSPTPDELAYRATE:
                 if ( !table_entry ) {
                     netsnmp_set_request_error(reqinfo, request,
                                               SNMP_NOSUCHINSTANCE);
                     continue;
                 }
                 snmp_set_var_typed_integer( request->requestvb, ASN_INTEGER,
-                                            table_entry->ftsPtpDelayResps);
+                                            table_entry->ftsPtpDelayRate);
                 break;
             default:
                 netsnmp_set_request_error(reqinfo, request,
@@ -397,7 +493,7 @@ ftsPtpTable_handler(
             table_info  =     netsnmp_extract_table_info( request);
     
             switch (table_info->colnum) {
-            case COLUMN_FTSPTPDOMAIN:
+            case COLUMN_FTSPTPMODE:
                 /* or possibly 'netsnmp_check_vb_int_range' */
                 ret = netsnmp_check_vb_int( request->requestvb );
                 if ( ret != SNMP_ERR_NOERROR ) {
@@ -405,7 +501,15 @@ ftsPtpTable_handler(
                     return SNMP_ERR_NOERROR;
                 }
                 break;
-			case COLUMN_FTSPTPDELAYRESPS:
+			case COLUMN_FTSPTPSYNRATE:
+				/* or possibly 'netsnmp_check_vb_int_range' */
+				ret = netsnmp_check_vb_int( request->requestvb );
+				if ( ret != SNMP_ERR_NOERROR ) {
+					netsnmp_set_request_error( reqinfo, request, ret );
+					return SNMP_ERR_NOERROR;
+				}
+				break;
+			case COLUMN_FTSPTPDELAYRATE:
 				/* or possibly 'netsnmp_check_vb_int_range' */
 				ret = netsnmp_check_vb_int( request->requestvb );
 				if ( ret != SNMP_ERR_NOERROR ) {
@@ -422,9 +526,11 @@ ftsPtpTable_handler(
         break;
 
     case MODE_SET_RESERVE2:
+		/*
         for (request = requests; request; request = request->next) {
             table_row = netsnmp_tdata_extract_row(request);
             table_info = netsnmp_extract_table_info(request);
+
 
             switch (table_info->colnum) {
             case COLUMN_FTSPTPDOMAIN:
@@ -446,6 +552,7 @@ ftsPtpTable_handler(
             }
         }
 
+        */
 
 
         break;
@@ -463,11 +570,14 @@ ftsPtpTable_handler(
             table_info  =     netsnmp_extract_table_info( request);
     
             switch (table_info->colnum) {
-            case COLUMN_FTSPTPDOMAIN:
-                table_entry->ftsPtpDomain     = *request->requestvb->val.integer;
+            case COLUMN_FTSPTPMODE:
+                table_entry->ftsPtpMode = *request->requestvb->val.integer;
                 break;
-			case COLUMN_FTSPTPDELAYRESPS:
-				table_entry->ftsPtpDelayResps = *request->requestvb->val.integer;
+			case COLUMN_FTSPTPSYNRATE:
+				table_entry->ftsPtpSynRate = *request->requestvb->val.integer;
+				break;
+			case COLUMN_FTSPTPDELAYRATE:
+				table_entry->ftsPtpDelayRate = *request->requestvb->val.integer;
 				break;
 
 				
@@ -476,6 +586,7 @@ ftsPtpTable_handler(
 		ftsPtpTable_data_save(table_data);
         break;
     case MODE_SET_UNDO:
+		/*
         for (request=requests; request; request=request->next) {
             if (request->processed)
                 continue;
@@ -493,8 +604,8 @@ ftsPtpTable_handler(
                 break;
             }
         }
+		*/
         break;
-
     case MODE_SET_COMMIT:
         break;
     }

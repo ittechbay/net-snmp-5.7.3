@@ -536,7 +536,7 @@ handle_ftsRefCurrent(netsnmp_mib_handler *handler,
             break;
         default:
             /* we should never get here, so this is a really bad error */
-            snmp_log(LOG_ERR, "unknown mode (%d) in handle_ftsRefCfg\n", reqinfo->mode );
+            snmp_log(LOG_ERR, "unknown mode (%d) in handle_ftsRefCfg\n", reqinfo->mode);
             return SNMP_ERR_GENERR;
     }
 

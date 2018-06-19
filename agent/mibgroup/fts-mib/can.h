@@ -81,7 +81,7 @@ struct sockaddr_can {
 	sa_family_t can_family;
 	int         can_ifindex;
 	union {
-		/* transport protocol class address information (e.g. ISOTP) */
+		/* transport protocol class address information (e.g. ISOTP)  */
 		struct { canid_t rx_id, tx_id; } tp;
 
 		/* reserved for future CAN protocols address information */

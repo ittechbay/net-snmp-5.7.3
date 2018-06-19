@@ -11,9 +11,11 @@ void initialize_table_ftsPtpTable(void);
 Netsnmp_Node_Handler ftsPtpTable_handler;
 
 /* column number definitions for table ftsPtpTable */
-       #define COLUMN_FTSPTPINDEX		1
-       #define COLUMN_FTSPTPSTATE		2
-       #define COLUMN_FTSPTPDOMAIN		3
-       #define COLUMN_FTSPTPDELAYREQS		4
-       #define COLUMN_FTSPTPDELAYRESPS		5
+#define COLUMN_FTSPTPSLOT		1
+#define COLUMN_FTSPTPERROR		 2
+#define COLUMN_FTSPTPMODE		 2
+#define COLUMN_FTSPTPSYNRATE		3
+#define COLUMN_FTSPTPDELAYRATE		4
+
+
 #endif /* FTSPTPTABLE_H */

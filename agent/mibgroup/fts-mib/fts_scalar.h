@@ -21,6 +21,13 @@
 #define VAR_FTS_TIMING_CFG 12
 #define VAR_FTS_NULL 13
 
+//new def for can
+#define FTS_VAR_REF_CFG 0
+#define FTS_VAR_REF_CURRENT 1
+#define FTS_VAR_CLK_STATE 2
+#define FTS_VAR_NULL 13
+
+
 
 struct fts_scalar_data_s {
 	char ftsRefCfg[FTS_STRING_LEN];

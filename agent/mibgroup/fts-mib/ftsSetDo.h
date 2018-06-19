@@ -45,5 +45,21 @@ void ftsSetCmdThread();
 #define FTS_SET_CMD_TABLE_REF 1
 #define FTS_SET_CMD_TABLE_NTP 2
 
+//new define 
+#define FTS_CAN_FRAME_CMD_CODE_PTP_SET_MODE 0x01
+#define FTS_CAN_FRAME_CMD_CODE_PTP_POLL 0x02
+#define FTS_CAN_FRAME_CMD_CODE_PTP_POLL_REPLY 0x02
+#define FTS_CAN_FRAME_CMD_CODE_PTP_GET_STATE 0x02
+#define FTS_CAN_FRAME_CMD_CODE_PTP_GET_STATE_REPLY 0x02
+#define FTS_CAN_FRAME_CMD_CODE_PTP_SET_PARAM 0x11
+
+#define FTS_CAN_FRAME_PTP_SET_IP_P1 0  //ptp ip设置帧第一部分
+#define FTS_CAN_FRAME_PTP_SET_IP_P2 1  //ptp ip设置帧第二部分
+
+
+
+
+
+
        
 #endif /* FTSSETDO_H */
